@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:music_app/pages/home_page.dart';
+import 'package:flutter/services.dart';
+import 'package:music_app/pages/Home_music_page.dart';
+import 'package:music_app/themes/theme.dart';
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // var repository = DefaultRepository();
-  // var songs = await repository.loadData();
-  // if(songs != null){
-  //   for(var song in songs){
-  //     debugPrint(song.toString());
-  //   }
-  // }
+    SystemChrome.setSystemUIOverlayStyle( const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light,
+    ));
   runApp(const MainApp());
 }
 
@@ -18,9 +17,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage()
-    );
+    return MaterialApp(
+        theme: Themes.lightTheme,
+        darkTheme: Themes.darkTheme,
+        debugShowCheckedModeBanner: false,
+        home: const HomeMusicPage());
   }
 }

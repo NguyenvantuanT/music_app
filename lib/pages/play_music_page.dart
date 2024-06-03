@@ -1,7 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/components/app_mediumButton.dart';
-import 'package:music_app/components/app_tab_bar.dart';
 import 'package:music_app/models/song_model.dart';
 import 'package:music_app/themes/color.dart';
 
@@ -56,8 +55,12 @@ class _PlayMusicPageState extends State<PlayMusicPage> {
     final radius = (size.width - delta) / 1.8;
     final song = widget.songs;
     return Scaffold(
-      backgroundColor: AppColor.white,
-      appBar: const AppTabBar(text: 'Now Playing'),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        title:const Text('Now playing '),
+        centerTitle: true,
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -93,7 +96,7 @@ class _PlayMusicPageState extends State<PlayMusicPage> {
             ),
             const SizedBox(height: 20),
             Slider(
-                activeColor: AppColor.black,
+                activeColor: Theme.of(context).colorScheme.primary,
                 value: _position.inSeconds.toDouble(),
                 max: _duration.inSeconds.toDouble(),
                 onChanged: (double value) {

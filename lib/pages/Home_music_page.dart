@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:music_app/components/app_row_song.dart';
 import 'package:music_app/components/app_search_box.dart';
 import 'package:music_app/components/app_tab_bar.dart';
@@ -10,7 +9,6 @@ import 'package:music_app/themes/color.dart';
 
 class HomeMusicPage extends StatefulWidget {
   const HomeMusicPage({super.key});
-
   @override
   State<HomeMusicPage> createState() => _HomeMusicPageState();
 }
@@ -50,38 +48,77 @@ class _HomeMusicPageState extends State<HomeMusicPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: AppColor.white,
+        backgroundColor: Theme.of(context).colorScheme.background,
         appBar: AppTabBar(
           text: 'Music',
-          color: AppColor.white,
-          onTap: () {
-            if (!showSearch) {
-              showSearch = true;
-              setState(() {});
-              addFocus.requestFocus();
-              return;
-            }
-            String text = searchController.text.trim();
-            if (text.isEmpty) {
-              showSearch = false;
-              setState(() {});
-              addFocus.unfocus();
-            }
-          },
+          icon:const Icon(Icons.light_mode_outlined),
+          onTap: () {},
         ),
-        body: SingleChildScrollView(
-          child: Column(
+        body: GestureDetector(
+          onTap: () =>  FocusScope.of(context).unfocus(),
+          child: Stack(
             children: [
-              Visibility(
-                visible: showSearch,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: _buildSearchBox(),
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Divider(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    Visibility(
+                      visible: showSearch,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: _buildSearchBox(),
+                      ),
+                    ),
+                    _buildBody(),
+                  ],
                 ),
               ),
-              _buildBody(),
+              _buildButtonSearch()
             ],
           ),
+        ));
+  }
+
+  Widget _buildButtonSearch() {
+    return Positioned(
+        left: 20,
+        right: 20,
+        bottom: 20,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            GestureDetector(
+              onTap: () {
+                if (!showSearch) {
+                  showSearch = true;
+                  setState(() {});
+                  return;
+                }
+                String text = searchController.text.trim();
+                if (text.isEmpty) {
+                  showSearch = false;
+                  setState(() {});
+                }
+              },
+              behavior: HitTestBehavior.translucent,
+              child: Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    border: Border.all(color: AppColor.black, width: 1.2),
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: AppColor.shadow,
+                          offset: Offset(0.0, 3.0),
+                          blurRadius: 6.0)
+                    ]),
+                child: const Icon(Icons.search, size: 22.0 , color: AppColor.red,),
+              ),
+            )
+          ],
         ));
   }
 

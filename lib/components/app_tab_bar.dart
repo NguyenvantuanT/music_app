@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:music_app/themes/color.dart';
 
 class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
-  const AppTabBar(
-      {super.key, this.color = AppColor.white, required this.text, this.onTap});
-
-  final Color color;
+   AppTabBar(
+      {super.key,
+      required this.text,
+      this.onTap,
+      this.icon});
+  final Icon? icon;
   final String text;
   final Function()? onTap;
   @override
@@ -15,18 +16,18 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18.0)
-          .copyWith(top: MediaQuery.of(context).padding.top + 15, bottom: 15),
-      color: color,
+          .copyWith(top: MediaQuery.of(context).padding.top + 10, bottom: 10),
+      color: Theme.of(context).colorScheme.background,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             text,
-            style: const TextStyle(color: Colors.black, fontSize: 20),
+            style:const TextStyle(fontSize: 20),
           ),
           GestureDetector(
             onTap: onTap,
-            child: Icon(Icons.search),
+            child: icon,
           )
         ],
       ),

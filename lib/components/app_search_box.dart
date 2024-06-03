@@ -14,8 +14,9 @@ class AppSearchBox extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-          color: AppColor.white,
-          border: Border.all(color: AppColor.black, width: 1.2)),
+          color: Theme.of(context).colorScheme.primary,
+          border: Border.all(color: AppColor.black, width: 1.2),
+          borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: TextField(
         focusNode: focusNode,
         controller: controller,
@@ -26,8 +27,10 @@ class AppSearchBox extends StatelessWidget {
             prefixIcon: Icon(
               Icons.search,
               color: AppColor.red,
+              size: 22.0,
             ),
             hintText: 'Search music',
+            hintStyle: TextStyle(color: AppColor.grey , fontSize: 15),
             ),
         textInputAction: TextInputAction.done,
       ),
