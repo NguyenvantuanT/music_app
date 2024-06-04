@@ -5,9 +5,10 @@ import 'package:music_app/models/song_model.dart';
 import 'package:music_app/themes/color.dart';
 
 class PlayMusicPage extends StatefulWidget {
-  const PlayMusicPage(this.song, {super.key, required, required this.songs});
+  const PlayMusicPage(
+      {super.key, required, required this.initialIndex, required this.songs});
 
-  final Song song;
+  final int initialIndex;
   final List<Song> songs;
 
   @override
@@ -38,7 +39,7 @@ class _PlayMusicPageState extends State<PlayMusicPage> {
     _audioPlayer.onPlayerComplete.listen((event) {
       _nextSong();
     });
-    _currentSongIndex = widget.songs.indexOf(widget.song);
+    // _currentSongIndex = widget.songs.indexOf(widget.song);
     // _playPause();
   }
 
@@ -58,106 +59,108 @@ class _PlayMusicPageState extends State<PlayMusicPage> {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.background,
-        title:const Text('Now playing '),
+        title: const Text('Now playing '),
         centerTitle: true,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(song[_currentSongIndex].album ?? ''),
-            const Text('_ ____ _'),
-            const SizedBox(height: 20),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10)
-                      .copyWith(bottom: 40),
-              child: _buildImageSong(radius, song),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                GestureDetector(
-                  onTap: () {},
-                  child: const Icon(Icons.share_outlined),
-                ),
-                Column(
-                  children: [
-                    Text(song[_currentSongIndex].title ?? ''),
-                    Text(song[_currentSongIndex].artist ?? '')
-                  ],
-                ),
-                GestureDetector(
-                  onTap: () {},
-                  child: const Icon(Icons.favorite_border),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Slider(
-                activeColor: Theme.of(context).colorScheme.primary,
-                value: _position.inSeconds.toDouble(),
-                max: _duration.inSeconds.toDouble(),
-                onChanged: (double value) {
-                  _seekTo(value);
-                }),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(song[_currentSongIndex].album ?? ''),
+              const Text('_ ____ _'),
+              const SizedBox(height: 20),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10)
+                        .copyWith(bottom: 40),
+                child: _buildImageSong(radius, song),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Text(_formatDuration(_position)),
-                  Text(_formatDuration(_duration)),
+                  GestureDetector(
+                    onTap: () {},
+                    child: const Icon(Icons.share_outlined),
+                  ),
+                  Column(
+                    children: [
+                      Text(song[_currentSongIndex].title ?? ''),
+                      Text(song[_currentSongIndex].artist ?? '')
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: const Icon(Icons.favorite_border),
+                  ),
                 ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                AppMediumbutton(
-                  icon: const Icon(
-                    Icons.shuffle,
-                    size: 24,
-                    color: AppColor.grey,
-                  ),
-                  onTap: () {},
+              const SizedBox(height: 20),
+              Slider(
+                  activeColor: Theme.of(context).colorScheme.primary,
+                  value: _position.inSeconds.toDouble(),
+                  max: _duration.inSeconds.toDouble(),
+                  onChanged: (double value) {
+                    _seekTo(value);
+                  }),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(_formatDuration(_position)),
+                    Text(_formatDuration(_duration)),
+                  ],
                 ),
-                AppMediumbutton(
-                  icon: const Icon(
-                    Icons.skip_previous,
-                    size: 36,
-                    color: AppColor.grey,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  AppMediumbutton(
+                    icon: const Icon(
+                      Icons.shuffle,
+                      size: 24,
+                      color: AppColor.grey,
+                    ),
+                    onTap: () {},
                   ),
-                  onTap: _backSong,
-                ),
-                AppMediumbutton(
-                  icon: Icon(
-                    _isPlaying ? Icons.pause : Icons.play_arrow,
-                    size: 48,
-                    color: AppColor.grey,
+                  AppMediumbutton(
+                    icon: const Icon(
+                      Icons.skip_previous,
+                      size: 36,
+                      color: AppColor.grey,
+                    ),
+                    onTap: _backSong,
                   ),
-                  onTap: _playPause,
-                ),
-                AppMediumbutton(
-                  icon: const Icon(
-                    Icons.skip_next,
-                    size: 36,
-                    color: AppColor.grey,
+                  AppMediumbutton(
+                    icon: Icon(
+                      _isPlaying ? Icons.pause : Icons.play_arrow,
+                      size: 48,
+                      color: AppColor.grey,
+                    ),
+                    onTap: _playPause,
                   ),
-                  onTap: _nextSong,
-                ),
-                AppMediumbutton(
-                  icon: const Icon(
-                    Icons.repeat,
-                    size: 24,
-                    color: AppColor.grey,
+                  AppMediumbutton(
+                    icon: const Icon(
+                      Icons.skip_next,
+                      size: 36,
+                      color: AppColor.grey,
+                    ),
+                    onTap: _nextSong,
                   ),
-                  onTap: () {},
-                )
-              ],
-            )
-          ],
+                  AppMediumbutton(
+                    icon: const Icon(
+                      Icons.repeat,
+                      size: 24,
+                      color: AppColor.grey,
+                    ),
+                    onTap: () {},
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -191,8 +194,7 @@ class _PlayMusicPageState extends State<PlayMusicPage> {
     if (_isPlaying) {
       _audioPlayer.pause();
     } else {
-      _audioPlayer
-          .play(UrlSource(widget.songs[_currentSongIndex].source ?? ''));
+      _audioPlayer.play(UrlSource(widget.songs[_currentSongIndex].source ?? ''));
     }
     setState(() {
       _isPlaying = !_isPlaying;

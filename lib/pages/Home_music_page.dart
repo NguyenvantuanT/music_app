@@ -14,35 +14,15 @@ class HomeMusicPage extends StatefulWidget {
 }
 
 class _HomeMusicPageState extends State<HomeMusicPage> {
+  late Future<List<Song>?> futureSongs;
   final TextEditingController searchController = TextEditingController();
-  List<Song> songs = [];
   List<Song> songSearchs = [];
   bool showSearch = false;
-  FocusNode addFocus = FocusNode();
-
-  void loadSong() async {
-    final repository = DefaultRepository();
-    List<Song>? loadedSongs = await repository.loadData();
-    if (loadedSongs != null) {
-      setState(() {
-        songs.addAll(loadedSongs);
-      });
-    }
-    songSearchs = [...songs];
-  }
 
   @override
   void initState() {
     super.initState();
-    loadSong();
-  }
-
-  void _search(String value) {
-    value = value.toLowerCase();
-    songSearchs = songs
-        .where((song) => (song.title ?? '').toLowerCase().contains(value))
-        .toList();
-    setState(() {});
+    futureSongs = DefaultRepository().loadData();
   }
 
   @override
@@ -51,86 +31,71 @@ class _HomeMusicPageState extends State<HomeMusicPage> {
         backgroundColor: Theme.of(context).colorScheme.background,
         appBar: AppTabBar(
           text: 'Music',
-          icon:const Icon(Icons.light_mode_outlined),
+          icon: const Icon(Icons.light_mode_outlined),
           onTap: () {},
         ),
-        body: GestureDetector(
-          onTap: () =>  FocusScope.of(context).unfocus(),
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                child: Column(
+        body: FutureBuilder(
+            future: futureSongs,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+              List<Song> songs = snapshot.data!;
+              List<Song> searchSongs = [...songs];
+              return GestureDetector(
+                onTap: () => FocusScope.of(context).unfocus(),
+                child: Stack(
                   children: [
-                    Divider(
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                    Visibility(
-                      visible: showSearch,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: _buildSearchBox(),
+                    SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Divider(
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          Visibility(
+                            visible: showSearch,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: _buildSearchBox(),
+                            ),
+                          ),
+                          _buildBody(searchSongs),
+                        ],
                       ),
                     ),
-                    _buildBody(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20.0, bottom: 20),
+                      child: _buildButtonSearch(),
+                    )
                   ],
                 ),
-              ),
-              _buildButtonSearch()
-            ],
-          ),
-        ));
+              );
+            }));
   }
 
-  Widget _buildButtonSearch() {
-    return Positioned(
-        left: 20,
-        right: 20,
-        bottom: 20,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            GestureDetector(
-              onTap: () {
-                if (!showSearch) {
-                  showSearch = true;
-                  setState(() {});
-                  return;
-                }
-                String text = searchController.text.trim();
-                if (text.isEmpty) {
-                  showSearch = false;
-                  setState(() {});
-                }
-              },
-              behavior: HitTestBehavior.translucent,
-              child: Container(
-                padding: const EdgeInsets.all(12.0),
-                decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
-                    border: Border.all(color: AppColor.black, width: 1.2),
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: AppColor.shadow,
-                          offset: Offset(0.0, 3.0),
-                          blurRadius: 6.0)
-                    ]),
-                child: const Icon(Icons.search, size: 22.0 , color: AppColor.red,),
-              ),
-            )
-          ],
-        ));
+  void _search(String value) {
+    value = value.toLowerCase();
+    if (value.isNotEmpty) {
+      showSearch = true;
+    } else {
+      showSearch = false;
+    }
+    setState(() {});
   }
 
-  Widget _buildSearchBox() {
-    return AppSearchBox(
-      focusNode: addFocus,
-      onChanged: _search,
-      controller: searchController,
-    );
-  }
+  ListView _buildBody(List<Song> songs) {
+    List<Song> filteredSongs = showSearch
+        ? songs
+            .where((song) => (song.title ?? '')
+                .toLowerCase()
+                .contains(searchController.text.toLowerCase()))
+            .toList()
+        : songs;
 
-  Widget _buildBody() {
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -142,20 +107,71 @@ class _HomeMusicPageState extends State<HomeMusicPage> {
         indent: 24.0,
         endIndent: 10.0,
       ),
-      itemCount: songSearchs.length,
+      itemCount: filteredSongs.length,
       itemBuilder: (context, index) {
-        final song = songSearchs[index];
+        final song = filteredSongs[index];
         return AppRowSong(
           song,
-          onPlay: () => _navigatorPlay(song, songs),
+          onPlay: () => _navigatorPlay(index, songs),
         );
       },
     );
   }
 
-  void _navigatorPlay(Song song, List<Song> songs) {
+  Widget _buildButtonSearch() {
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          GestureDetector(
+            onTap: () {
+              if (!showSearch) {
+                showSearch = true;
+                setState(() {});
+                return;
+              }
+              String text = searchController.text.trim();
+              if (text.isEmpty) {
+                showSearch = false;
+                setState(() {});
+              }
+            },
+            behavior: HitTestBehavior.translucent,
+            child: Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  border: Border.all(color: AppColor.black, width: 1.2),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: AppColor.shadow,
+                        offset: Offset(0.0, 3.0),
+                        blurRadius: 6.0)
+                  ]),
+              child: const Icon(
+                Icons.search,
+                size: 22.0,
+                color: AppColor.red,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBox() {
+    return AppSearchBox(
+      onChanged: _search,
+      controller: searchController,
+    );
+  }
+
+  void _navigatorPlay(int index, List<Song> songs) {
     Route route = MaterialPageRoute(
-        builder: (context) => PlayMusicPage(song, songs: songs));
+        builder: (context) => PlayMusicPage(initialIndex: index, songs: songs));
     Navigator.push(context, route);
   }
 }
